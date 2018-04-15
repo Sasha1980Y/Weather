@@ -7,9 +7,14 @@
 //
 
 import Foundation
+import RxSwift
 
 protocol LoaderDelegate: class {
     func downloadJSON(city: String, position: Int)
+}
+
+protocol TableViewDelegate: class {
+    func refreshTable()
 }
 
 class Loader {
@@ -18,9 +23,11 @@ class Loader {
     
     weak var delegate: LoaderDelegate?
     
-    var arrayModels: [Model] = []
+    var arrayModels: Variable<[Model]> = Variable([])
     
     static var openWeather: [OpenWeather] = []
+    
+    weak var tableViewDelegate: TableViewDelegate?
     
     func startDownload(city: String, position: Int) {
         delegate?.downloadJSON(city: city, position: position)
@@ -43,7 +50,7 @@ class Loader {
         
         URLSession.shared.dataTask(with: url) { (data, resp, error) in
             
-            print("ok")
+            print("ok Loader dataTask")
             guard let data = data else {
                 return
             }
@@ -61,7 +68,11 @@ class Loader {
                 }*/
                 
                 DispatchQueue.main.async {
-                    Loader.shared.arrayModels[position].openWeather = json
+                    let object = OpenWeather(weather: [OpenWeather.Weather.init(description: "snown")], main: OpenWeather.Main.init(temp: 272, pressure: 1000, humidity: 80), wind: OpenWeather.Wind.init(speed: 4.3), id: 333999, name: "London")
+                    
+                    Loader.shared.arrayModels.value[position].openWeather = json
+                    
+                    self.tableViewDelegate?.refreshTable()
                 }
                 
                 

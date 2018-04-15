@@ -37,32 +37,32 @@ class DetailViewController: UIViewController {
     func downloadInfo() {
         cityLabel.text = city
         
-        if Loader.shared.arrayModels[index].openWeather != nil {
-            if (Loader.shared.arrayModels[index].openWeather?.weather) != nil {
-                contentDescriptionLabel.text = Loader.shared.arrayModels[index].openWeather?.weather![0].description
+        if Loader.shared.arrayModels.value[index].openWeather != nil {
+            if (Loader.shared.arrayModels.value[index].openWeather?.weather) != nil {
+                contentDescriptionLabel.text = Loader.shared.arrayModels.value[index].openWeather?.weather![0].description
             }
         }
-        if Loader.shared.arrayModels[index].openWeather != nil {
-            if (Loader.shared.arrayModels[index].openWeather?.main) != nil {
-                if let pressure = Loader.shared.arrayModels[index].openWeather?.main?.pressure {
+        if Loader.shared.arrayModels.value[index].openWeather != nil {
+            if (Loader.shared.arrayModels.value[index].openWeather?.main) != nil {
+                if let pressure = Loader.shared.arrayModels.value[index].openWeather?.main?.pressure {
                     let pressureFloat = String(pressure)
                     contentPressureLabel.text = pressureFloat
                 }
                 
             }
         }
-        if Loader.shared.arrayModels[index].openWeather != nil {
-            if (Loader.shared.arrayModels[index].openWeather?.main) != nil {
-                if let humidity = Loader.shared.arrayModels[index].openWeather?.main?.humidity {
+        if Loader.shared.arrayModels.value[index].openWeather != nil {
+            if (Loader.shared.arrayModels.value[index].openWeather?.main) != nil {
+                if let humidity = Loader.shared.arrayModels.value[index].openWeather?.main?.humidity {
                     let humidityInt = String(humidity)
                     contentHudimityLabel.text = humidityInt
                 }
                 
             }
         }
-        if Loader.shared.arrayModels[index].openWeather != nil {
-            if (Loader.shared.arrayModels[index].openWeather?.wind) != nil {
-                if let windSpeed = Loader.shared.arrayModels[index].openWeather?.wind?.speed {
+        if Loader.shared.arrayModels.value[index].openWeather != nil {
+            if (Loader.shared.arrayModels.value[index].openWeather?.wind) != nil {
+                if let windSpeed = Loader.shared.arrayModels.value[index].openWeather?.wind?.speed {
                     let speedFloat = String(windSpeed)
                     contentWindSpeeedLabel.text = speedFloat
                 }

@@ -7,15 +7,20 @@
 //
 
 import UIKit
+import RxSwift
 
-class ViewController: UIViewController, LoaderDelegate {
+
+
+class ViewController: UIViewController, LoaderDelegate, TableViewDelegate {
+    
+    
     
     
 
     @IBOutlet weak var tableView: UITableView!
     
     let loader = Loader()
-    
+    let loader2 = Loader()
     //var arrayOfCity = ["Вінниця", "Київ"]
     
     
@@ -33,16 +38,44 @@ class ViewController: UIViewController, LoaderDelegate {
         loader.delegate = self
         //loader.startDownload(city: "London")
         
+        loader2.tableViewDelegate = self
+        //loader2.
+        
+        
+        let disposeBag = DisposeBag()
+        
+        Loader.shared.arrayModels.asObservable().subscribe(onNext: { (arrayOfModels) in
+            //self.tableView.reloadData()
+        }, onError: { (error) in
+            print(error.localizedDescription)
+        }, onCompleted: {
+            print("ok rx")
+        }, onDisposed: {
+            
+        }).disposed(by: disposeBag)
+            
+        
+        
+        
     }
     
     func downloadJSON(city: String, position: Int) {
         loader.downloadJSON(city: city, position: position)
-        print("ok")
+        print("ok downloadJSON")
+        self.tableView.reloadData()
+    }
+    
+    func refreshTable() {
+        self.tableView.reloadData()
     }
 
     func fillArray() {
-        Loader.shared.arrayModels.append(Model(city: "Вінниця", openWeather: nil))
-        Loader.shared.arrayModels.append(Model(city: "Київ", openWeather: nil))
+        
+        let object = OpenWeather(weather: [OpenWeather.Weather.init(description: "snown")], main: OpenWeather.Main.init(temp: 272, pressure: 1000, humidity: 80), wind: OpenWeather.Wind.init(speed: 4.3), id: 333999, name: "London")
+        let object2 = OpenWeather(weather: [OpenWeather.Weather.init(description: "rained")], main: OpenWeather.Main.init(temp: 270, pressure: 1200, humidity: 90), wind: OpenWeather.Wind.init(speed: 4.4), id: 333999, name: "London")
+        
+        Loader.shared.arrayModels.value.append(Model(city: "Вінниця", openWeather: object))
+        Loader.shared.arrayModels.value.append(Model(city: "Київ", openWeather: object2))
     }
 
     @IBAction func plusButtton() {
@@ -57,8 +90,9 @@ class ViewController: UIViewController, LoaderDelegate {
         let action = UIAlertAction(title: "OK", style: .default) { [weak alert](_) in
             let textField = alert?.textFields![0]
             if let text = textField?.text {
-                Loader.shared.arrayModels.append(Model(city: text, openWeather: nil))
+                Loader.shared.arrayModels.value.append(Model(city: text, openWeather: nil))
                 self.tableView.reloadData()
+                
             }
         }
         
@@ -72,7 +106,7 @@ class ViewController: UIViewController, LoaderDelegate {
             let vc = segue.destination as! DetailViewController
             vc.title = "Detail Weather"
             if let number = numberSelectedCell {
-                vc.city = Loader.shared.arrayModels[number].city
+                vc.city = Loader.shared.arrayModels.value[number].city
                 vc.index = number
             }
             
@@ -85,22 +119,22 @@ class ViewController: UIViewController, LoaderDelegate {
 }
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Loader.shared.arrayModels.count
+        return Loader.shared.arrayModels.value.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! TableViewCell
         
-        if (Loader.shared.arrayModels[indexPath.row].openWeather != nil) {
-            loader.startDownload(city: Loader.shared.arrayModels[indexPath.row].city, position: indexPath.row)
+        if (Loader.shared.arrayModels.value[indexPath.row].openWeather == nil) {
+            loader.startDownload(city: Loader.shared.arrayModels.value[indexPath.row].city, position: indexPath.row)
         }
         
         
         
         
-        cell.cityLabel.text = Loader.shared.arrayModels[indexPath.row].city
+        cell.cityLabel.text = Loader.shared.arrayModels.value[indexPath.row].city
         cell.detailButton.addTarget(self, action: #selector(tapToButton(sender:)), for: .touchUpInside)
-        if let temperature = Loader.shared.arrayModels[indexPath.row].openWeather?.main?.temp {
+        if let temperature = Loader.shared.arrayModels.value[indexPath.row].openWeather?.main?.temp {
             cell.temperatureLabel.text = String(temperature)
         }
         
@@ -113,13 +147,13 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         if editingStyle == .delete {
             print("Deleted")
             
-            Loader.shared.arrayModels.remove(at: indexPath.row)
+            Loader.shared.arrayModels.value.remove(at: indexPath.row)
             self.tableView.deleteRows(at: [indexPath], with: .automatic)
         }
     }
     
     @objc func tapToButton(sender: UIButton) {
-        print("ok")
+        print("ok button")
         if let cell = sender.superview?.superview as? TableViewCell {
             let indexPath = tableView.indexPath(for: cell)
             numberSelectedCell = indexPath?.row
