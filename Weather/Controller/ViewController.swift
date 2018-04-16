@@ -8,10 +8,16 @@
 
 import UIKit
 import RxSwift
+import Alamofire
+
+class Connectivity {
+    class func isConnectedToInternet() ->Bool {
+        return NetworkReachabilityManager()!.isReachable
+    }
+}
 
 
-
-class ViewController: UIViewController, LoaderDelegate, TableViewDelegate {
+class ViewController: UIViewController, LoaderDelegate , TableViewDelegate {
     
     
     
@@ -20,10 +26,8 @@ class ViewController: UIViewController, LoaderDelegate, TableViewDelegate {
     @IBOutlet weak var tableView: UITableView!
     
     let loader = Loader()
-    let loader2 = Loader()
+    
     //var arrayOfCity = ["Вінниця", "Київ"]
-    
-    
     
     var openWeatherArray: [OpenWeather]?
     
@@ -32,18 +36,22 @@ class ViewController: UIViewController, LoaderDelegate, TableViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        fillArray()
-        
-        // delegate Loader
-        loader.delegate = self
-        //loader.startDownload(city: "London")
-        
-        loader2.tableViewDelegate = self
-        //loader2.
+        if Connectivity.isConnectedToInternet() {
+            print("Yes! internet is available.")
+            
+            fillArray()
+            
+            // delegate Loader
+            loader.delegate = self
+            loader.tableViewDelegate = self
+            
+            
+        } else {
+            print("internet is unavailable")
+        }
         
         
         let disposeBag = DisposeBag()
-        
         Loader.shared.arrayModels.asObservable().subscribe(onNext: { (arrayOfModels) in
             //self.tableView.reloadData()
         }, onError: { (error) in
@@ -53,29 +61,38 @@ class ViewController: UIViewController, LoaderDelegate, TableViewDelegate {
         }, onDisposed: {
             
         }).disposed(by: disposeBag)
-            
-        
-        
         
     }
     
     func downloadJSON(city: String, position: Int) {
         loader.downloadJSON(city: city, position: position)
         print("ok downloadJSON")
-        self.tableView.reloadData()
+        //self.tableView.reloadData()
+    }
+    
+    func downloadForecast(id: Int) {
+        //loader.downloadForecast(id: id)
+        //self.view.layoutIfNeeded()
     }
     
     func refreshTable() {
         self.tableView.reloadData()
     }
+    
+    
 
     func fillArray() {
-        
+        /*
         let object = OpenWeather(weather: [OpenWeather.Weather.init(description: "snown")], main: OpenWeather.Main.init(temp: 272, pressure: 1000, humidity: 80), wind: OpenWeather.Wind.init(speed: 4.3), id: 333999, name: "London")
         let object2 = OpenWeather(weather: [OpenWeather.Weather.init(description: "rained")], main: OpenWeather.Main.init(temp: 270, pressure: 1200, humidity: 90), wind: OpenWeather.Wind.init(speed: 4.4), id: 333999, name: "London")
         
         Loader.shared.arrayModels.value.append(Model(city: "Вінниця", openWeather: object))
         Loader.shared.arrayModels.value.append(Model(city: "Київ", openWeather: object2))
+        */
+        
+        Loader.shared.arrayModels.value.append(Model(city: "Вінниця", openWeather: nil))
+        Loader.shared.arrayModels.value.append(Model(city: "Київ", openWeather: nil))
+        
     }
 
     @IBAction func plusButtton() {
@@ -110,8 +127,6 @@ class ViewController: UIViewController, LoaderDelegate, TableViewDelegate {
                 vc.index = number
             }
             
-            
-            
         }
     }
     
@@ -127,17 +142,15 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         
         if (Loader.shared.arrayModels.value[indexPath.row].openWeather == nil) {
             loader.startDownload(city: Loader.shared.arrayModels.value[indexPath.row].city, position: indexPath.row)
+        } else {
+            
         }
-        
-        
-        
         
         cell.cityLabel.text = Loader.shared.arrayModels.value[indexPath.row].city
         cell.detailButton.addTarget(self, action: #selector(tapToButton(sender:)), for: .touchUpInside)
         if let temperature = Loader.shared.arrayModels.value[indexPath.row].openWeather?.main?.temp {
             cell.temperatureLabel.text = String(temperature)
         }
-        
         
         return cell
         

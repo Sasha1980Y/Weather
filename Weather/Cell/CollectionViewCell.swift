@@ -10,4 +10,14 @@ import UIKit
 
 class CollectionViewCell: UICollectionViewCell {
     
+    @IBOutlet weak var dateLabel: UILabel!
+    
+    @IBOutlet weak var tempLabel: UILabel!
+    
+    @IBOutlet weak var pressuerLabel: UILabel!
+    
+    @IBOutlet weak var humidityLabel: UILabel!
+    
+    @IBOutlet weak var descriptionLabel: UILabel!
+    
 }

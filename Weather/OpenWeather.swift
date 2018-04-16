@@ -22,7 +22,6 @@ struct OpenWeather: Decodable {
     var wind: Wind?
     struct Wind: Decodable {
         var speed: Float?
-        
     }
     var id: Int?
     var name: String?
